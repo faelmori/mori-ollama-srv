@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-  function _install_mori_llama() {
+function _install_mori_llama() {
     printf "\033[H\033[2J"
 
     echo "💻️ Installing dependencies..."
@@ -15,13 +15,17 @@
     docker network create hub-ass-pub-net
 
     echo "🚀 Starting services..."
-    docker-compose up -d --build --force-recreate
+    docker compose up -d --build --force-recreate
 
     echo "🌍 Opening Open WebUI..."
     sleep 1
-    xdg-open http://localhost:3000
+    xdg-open http://localhost:3000 &
+    
+    disown || true
+
+    return 0
   }
 
-  _install_mori_llama || exit 1
+  _install_mori_llama
 
-  exit 0
+  exit $?
