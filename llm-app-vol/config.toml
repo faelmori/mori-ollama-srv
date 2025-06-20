@@ -1,0 +1,6 @@
+[ollama]
+num_thread = 6
+num_batch = 8
+num_ctx = 2048
+f16 = true
+low_vram = true

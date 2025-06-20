@@ -44,6 +44,11 @@ services:
       - host.docker.internal:host-gateway
     volumes:
       - llm-app-vol:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          memory: 14g
+          cpus: '6.0'
 
 networks:
   hub-ass-priv-net:
