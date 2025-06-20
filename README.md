@@ -1,6 +1,6 @@
 # 🚀 Open-WebUI + Ollama with Docker Compose
 
-This project sets up an environment to run Open-WebUI and Ollama using `docker-compose`.
+This project sets up an environment to run Open-WebUI and Ollama using `docker compose`.
 
 ## 📦 Installation and Execution
 
@@ -12,7 +12,7 @@ This project sets up an environment to run Open-WebUI and Ollama using `docker-c
 
 2. **Run the installation script**:
    ```sh
-   ./install.sh
+   bash ./install.sh
    ```
 
 3. **Access the Open WebUI**:
@@ -57,4 +57,4 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## 📧 Contact
 
-For any inquiries, please contact [faelmori](https://github.com/faelmori).
+For any inquiries, please contact [rafa-mori](https://github.com/rafa-mori).
