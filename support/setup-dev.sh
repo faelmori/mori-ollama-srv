@@ -92,6 +92,21 @@ clear_script_cache() {
   exit 0
 }
 
+create_docker_networks() {
+  if docker network ls | grep -q "hub-ass-priv-net"; then
+    log warn "Network 'hub-ass-priv-net' already exists, skipping creation."
+  else
+    echo "🌐 Creating Docker networks..."
+    docker network create hub-ass-priv-net --subnet=10.0.0.0/28 &>/dev/null || true
+  fi
+
+  if docker network ls | grep -q "hub-ass-pub-net"; then
+    log warn "Network 'hub-ass-pub-net' already exists, skipping creation."
+  else
+    docker network create hub-ass-pub-net &>/dev/null || true
+  fi
+}
+
 set_trap() {
   local current_shell=""
   current_shell=$(get_current_shell)
@@ -214,6 +229,13 @@ run_local_stack() {
   print_banner
   parse_args "$@"
   set_cpu_performance_mode
+  create_docker_networks
+  create_docker_volumes
+  
+  log info "Using model: $([ "$USE_LIGHT" = true ] && echo "$LIGHT_MODEL" || echo "$DEFAULT_MODEL")"
+  log info "Project name: $PROJECT_NAME"
+  log info "WebUI URL: $WEBUI_URL"
+  log info "Ollama API URL: http://localhost:$OLLAMA_PORT"
 
   MODEL_NAME=$([ "$USE_LIGHT" = true ] && echo "$LIGHT_MODEL" || echo "$DEFAULT_MODEL")
 

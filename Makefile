@@ -1,15 +1,10 @@
-# Description: Makefile for building and installing a Go application
+# Description: Makefile for building and managing a Docker-based LLM application
+# This Makefile provides targets for setting up, running, and managing the application,
+# including performance optimizations, pulling models, and cleaning up build artifacts.
 # Author: Rafael Mori
 # Copyright (c) 2025 Rafael Mori
 # License: MIT License
 
-# This Makefile is used to build and install a Go application.
-# It provides commands for building the binary, installing it, cleaning up build artifacts,
-# and running tests. It also includes a help command to display usage information.
-# The Makefile uses color codes for logging messages and provides a consistent interface
-# for interacting with the application.
-
-# Define the application name and root directory
 APP_NAME := $(shell echo $(basename $(CURDIR)) | tr '[:upper:]' '[:lower:]')
 ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -33,35 +28,34 @@ INSTALL_SCRIPT=$(ROOT_DIR)support/setup-dev.sh
 CMD_STR := $(strip $(firstword $(ARGUMENTS)))
 ARGS := $(filter-out $(strip $(CMD_STR)), $(ARGUMENTS))
 
-# Ativa modo performance no Linux
 perfmode:
 	@echo "⚙️  Setting CPU governor to performance..."
+	@if sudo -v 2>/dev/null; then \
+		echo "✅ Sudo permissions granted."; \
+	else \
+		echo "❌ Sudo permissions required. Please run with sudo."; \
+		exit 1; \
+	fi
 	@for CPUFREQ in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do \
 		echo performance | sudo tee $$CPUFREQ; \
 	done
 	@echo "✅ CPU governor set to performance."
 
-# Inicia os serviços
 up:
 	docker compose up -d --build --force-recreate
 
-# Puxa o modelo recomendado
 pull:
 	docker exec -it llm-app ollama pull deepseek-coder:6.7b
 
-# Roda o modelo diretamente
 run:
 	docker exec -it llm-app ollama run deepseek-coder:6.7b
 
-# Mostra os logs da UI
 logs:
 	docker logs -f llm-ui
 
-# Executa tudo com otimização
 dev: perfmode up pull
 	@echo "🚀 Environment is up and optimized! Access: http://localhost:3000"
 
-# Clean up build artifacts.
 clean:
 	$(call log_info, Cleaning up build artifacts)
 	$(call log_info, Args: $(ARGS))
@@ -76,7 +70,6 @@ clean:
 	fi
 	$(shell exit 0)
 
-# Run tests.
 test:
 	$(call log_info, Running tests and benchmarks)
 	$(call log_info, Args: $(ARGS))
@@ -84,7 +77,6 @@ test:
 	@bash $(INSTALL_SCRIPT) 
 	$(shell exit 0)
 
-## Run dynamic commands with arguments calling the install script.
 %:
 	@:
 	$(call log_info, Running command: $(CMD_STR))
@@ -92,7 +84,6 @@ test:
 	@bash $(INSTALL_SCRIPT) $(CMD_STR) $(ARGS)
 	$(shell exit 0)
 
-# Display help message.
 help:
 	$(call log, $(APP_NAME) Makefile)
 	$(call log_break)
@@ -138,23 +129,3 @@ help:
 	$(call log_break)
 	$(call log_success, End of help message)
 	$(shell exit 0)
-
-
-# End of script
-
-# Usage:
-#    chmod +x setup-dev.sh
-#    ./setup-dev.sh [options]
-# Options:
-#    --light              Use the light model
-#    --remote=<host>      Run setup on a remote host
-#    --no-benchmark       Skip benchmarking
-# Models:
-#   # deepseek-coder:6.7b:
-#   ./setup-dev.sh
-#   # mistral:
-#   ./setup-dev.sh --light
-#   # remote setup:
-#   ./setup-dev.sh --remote=user@remote-host
-#   # skip benchmark:
-#   ./setup-dev.sh --no-benchmark

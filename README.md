@@ -1,140 +1,119 @@
-# 🚀 Open-WebUI + Ollama with Docker Compose
+# 🚀 Mori Ollama Stack (Open-WebUI + Ollama via Docker Compose)
 
-This project provides a ready-to-use environment to run [Open-WebUI](https://github.com/open-webui/open-webui) alongside [Ollama](https://ollama.com/) using Docker Compose. It enables local testing of powerful LLMs with a simple setup and a clean web interface — no local installation of Ollama required on your host machine.
+This repository sets up a ready-to-use environment for running Ollama models with Open-WebUI, allowing local experimentation with LLMs using Docker Compose.
 
 ---
 
-## 📦 Installation and Execution
+## 📦 Installation
 
-1. **Clone this repository**:
-   ```bash
-   git clone https://github.com/faelmori/mori-ollama-srv.git
-   cd mori-ollama-srv
-   ```
+```bash
+git clone https://github.com/rafa-mori/mori-ollama-srv.git
+cd mori-ollama-srv
+make dev
+```
 
-2. **Run the installation script**:
+To install using the advanced script with custom flags:
 
-   ```bash
-   bash ./install.sh
-   ```
+```bash
+bash support/setup-dev.sh --light        # Use lightweight model
+bash support/setup-dev.sh --no-benchmark # Skip benchmark step
+bash support/setup-dev.sh --remote=user@host
+```
 
-3. **Access the WebUI**:
-   Open your browser and go to: [http://localhost:3000](http://localhost:3000)
+Or simply use Make:
+
+```bash
+make install ARGS="--light"
+make install ARGS="--remote=user@host"
+```
 
 ---
 
 ## 🧠 Supported Models
 
-The Ollama service supports a variety of open-source models. Below are some popular ones:
+| Model Name              | Description                                                                 |
+|-------------------------|-----------------------------------------------------------------------------|
+| `deepseek-coder:6.7b`  | Coding-focused LLM with structured responses. Great for code generation.   |
+| `mistral`              | Lightweight general-purpose LLM. Lower RAM usage and faster loading.        |
+| `llama`                | Meta's LLM family — generalist models with decent coding ability.           |
 
-| Model            | Description                                                                                |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| `llama3:latest`  | Meta’s flagship model with excellent contextual understanding.                             |
-| `mistral:latest` | Lightweight and fast model, great for resource-constrained environments.                   |
-| `deepseek-coder` | Code-oriented model ideal for autocompletion, code generation, and developer productivity. |
-| `deepseek-llm`   | General-purpose reasoning model from DeepSeek.                                             |
-| `gemma:latest`   | Google's open-source conversational model.                                                 |
-| `phi3:latest`    | Efficient model from Microsoft, ideal for local/edge deployments.                          |
+To change models:
 
----
-
-## 🐳 Docker Compose Services
-
-* **llm-ui**: Runs the Open-WebUI frontend.
-* **llm-app**: Runs the Ollama backend responsible for model execution.
+```bash
+make install ARGS="--light"          # Use mistral
+make install ARGS="--no-benchmark"   # Skip testing
+```
 
 ---
 
-## 🛠️ Configuration
+## 🛠️ Makefile Targets
 
-* **Volumes**:
+| Command         | Description                                               |
+|----------------|-----------------------------------------------------------|
+| `make dev`     | Optimizes CPU + starts everything with recommended model. |
+| `make up`      | Starts the Docker stack.                                  |
+| `make pull`    | Pulls the default model (deepseek-coder:6.7b).            |
+| `make run`     | Runs the model interactively (via CLI inside container).  |
+| `make logs`    | Shows the WebUI logs.                                     |
+| `make clean`   | Clean up all Docker artifacts and volumes.                |
+| `make test`    | Re-runs setup-dev.sh with benchmarking.                   |
+| `make help`    | Displays all available commands and options.              |
 
-  * `llm-ui-vol`: Persists WebUI data (user preferences, history, etc.).
-  * `llm-app-vol`: Stores downloaded models and Ollama runtime data.
+You can also pass flags like this:
 
-* **Networks**:
-
-  * `hub-ass-priv-net`: Internal communication network between services.
-  * `hub-ass-pub-net`: Public-facing network for browser access.
+```bash
+make install ARGS="--remote=user@host"
+make install ARGS="--light --no-benchmark"
+```
 
 ---
 
 ## 📂 Project Structure
 
-```
+```plaintext
 mori-ollama-srv/
-├── docker-compose.yaml        # Defines services and networks
-├── install.sh                 # Setup automation script
-├── secrets/
-│   ├── .llm.ui.dev.env        # WebUI development config
-│   ├── .llm.ui.prd.env        # WebUI production config
-│   ├── .llm.app.dev.env       # Ollama development config
-│   ├── .llm.app.prd.env       # Ollama production config
+├── docker-compose.yaml
+├── support/
+│   └── setup-dev.sh         # Main setup script
+├── Makefile                 # Developer commands and automation
+├── secrets/                 # Optional environment overrides
 └── README.md
 ```
 
 ---
 
-## 🧰 Using Ollama CLI (Inside Docker)
+## 🔍 Benchmarking
 
-Since Ollama runs inside a Docker container, the CLI must be accessed **inside the container**.
-
-### ➤ Run a model:
-
-```bash
-docker exec -it llm-app ollama run llama3
-```
-
-### ➤ Pull a model manually:
+The script auto-benchmarks response time on the first call to ensure your setup is responsive.
+You can skip benchmarking with:
 
 ```bash
-docker exec -it llm-app ollama pull deepseek-coder
-```
-
-### ➤ Open a shell inside the container:
-
-```bash
-docker exec -it llm-app bash
-# or 'sh' if bash is not available
-```
-
-### 🔁 Optional: Create an alias (recommended)
-
-To simplify repeated use, you can add this to your `.bashrc` or `.zshrc`:
-
-```bash
-alias ollamac="docker exec -it llm-app ollama"
-```
-
-Now you can use:
-
-```bash
-ollamac run mistral
-ollamac pull llama3
+make install ARGS="--no-benchmark"
 ```
 
 ---
 
-## ✅ Requirements
+## 🌍 Access the UI
 
-* Docker and Docker Compose installed
-* 8GB+ RAM recommended
-* Around 2GB+ disk space per model
+After starting:
+
+> [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
+MIT License — Rafael Mori (c) 2025
 
 ---
 
-## 🌟 Contributing
+## 💬 Contributing
 
-Contributions are welcome! Feel free to open an issue or submit a pull request to improve the project or suggest new features.
+PRs, issues, and suggestions are always welcome!
 
 ---
 
 ## 📧 Contact
 
-For inquiries, suggestions, or collaboration opportunities, contact [rafa-mori](https://github.com/rafa-mori).
+- GitHub: [@rafa-mori](https://github.com/rafa-mori)
+- Site: [https://rafamori.pro](https://rafamori.pro)
